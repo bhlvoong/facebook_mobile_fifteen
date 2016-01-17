@@ -37,7 +37,7 @@ class FeedViewController: UICollectionViewController, UICollectionViewDelegateFl
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        return CGSizeMake(view.frame.width, 200)
+        return CGSizeMake(view.frame.width, 400)
     }
     
 }
@@ -76,16 +76,98 @@ class FeedCell: UICollectionViewCell {
         return imageView
     }()
     
+    let bodyTextView: UITextView = {
+        let textView = UITextView()
+        let attributedText = NSMutableAttributedString(string: "Meanwhile, ", attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)])
+        attributedText.appendAttributedString(NSAttributedString(string: "Beast ", attributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(14)]))
+        attributedText.appendAttributedString(NSAttributedString(string: "turned to the dark side.", attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)]))
+        textView.attributedText = attributedText
+        textView.scrollEnabled = false
+        return textView
+    }()
+    
+    let postImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "zuckdog")
+        imageView.contentMode = .ScaleAspectFill
+        imageView.layer.masksToBounds = true
+        return imageView
+    }()
+    
+    let numLikesCommentsLabel: UILabel = {
+        let label = UILabel()
+        label.text = "488K Likes  10.7K Comments"
+        label.font = UIFont.systemFontOfSize(12)
+        label.textColor = UIColor.lightGrayColor()
+        return label
+    }()
+    
+    let arrowButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "arrow_down"), forState: .Normal)
+        button.imageEdgeInsets = UIEdgeInsetsMake(16, 18, 16, 18)
+        return button
+    }()
+    
+    let likeButton = FeedCell.buttonWithImageName("thumbs_up", title: "Like")
+    let commentButton = FeedCell.buttonWithImageName("comment", title: "Comment")
+    let shareButton = FeedCell.buttonWithImageName("share", title: "Share")
+    
+    let likeCommentShareContainerView = UIView()
+    
+    static func buttonWithImageName(name: String, title: String) -> UIButton {
+        let button = UIButton()
+        button.setTitle(title, forState: .Normal)
+        button.titleLabel?.font = UIFont.boldSystemFontOfSize(12)
+        button.setTitleColor(UIColor.rgb(159, green: 158, blue: 164, alpha: 1), forState: .Normal)
+        button.setImage(UIImage(named: name), forState: .Normal)
+        button.imageEdgeInsets = UIEdgeInsetsMake(0, -10, 2, 0)
+        return button
+    }
+    
+    let horizontalDividerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.rgb(241, green: 241, blue: 243, alpha: 1)
+        return view
+    }()
+    
     func setupViews() {
         backgroundColor = UIColor.whiteColor()
         
         addSubview(nameLabel)
         addSubview(profileImageView)
+        addSubview(bodyTextView)
+        addSubview(postImageView)
+        addSubview(numLikesCommentsLabel)
+        addSubview(horizontalDividerView)
+        addSubview(likeCommentShareContainerView)
         
-        addConstraintsWithFormat("V:|-8-[v0]", views:nameLabel)
+        likeCommentShareContainerView.addSubview(likeButton)
+        likeCommentShareContainerView.addSubview(commentButton)
+        likeCommentShareContainerView.addSubview(shareButton)
         
-        addConstraintsWithFormat("H:|-8-[v0(40)]-8-[v1]", views: profileImageView, nameLabel)
-        addConstraintsWithFormat("V:|-8-[v0(40)]", views: profileImageView)
+        addSubview(arrowButton)
+        
+        addConstraintsWithFormat("V:|-8-[v0(40)][v1(24)]-8-[v2]-8-[v3(20)]-8-[v4(1)]-2-[v5(28)]-16-|", views: profileImageView, bodyTextView, postImageView, numLikesCommentsLabel, horizontalDividerView, likeCommentShareContainerView)
+        
+        addConstraintsWithFormat("H:|-8-[v0(40)]-8-[v1]-8-[v2(50)]|", views: profileImageView, nameLabel, arrowButton)
+        
+        addConstraintsWithFormat("V:|-4-[v0(40)]", views: arrowButton)
+        
+        addConstraintsWithFormat("V:|-10-[v0]", views: nameLabel)
+        
+        addConstraintsWithFormat("H:|-2-[v0]|", views: bodyTextView)
+        addConstraintsWithFormat("H:|[v0]|", views: postImageView)
+        addConstraintsWithFormat("H:|-10-[v0]-10-|", views: numLikesCommentsLabel)
+        addConstraintsWithFormat("H:|-10-[v0]-10-|", views: horizontalDividerView)
+        
+        addConstraintsWithFormat("H:|[v0]|", views: likeCommentShareContainerView)
+        
+        likeCommentShareContainerView.addConstraintsWithFormat("H:|[v0(v2)][v1(v2)][v2]|", views: likeButton, commentButton, shareButton)
+
+        likeCommentShareContainerView.addConstraintsWithFormat("V:[v0]|", views: likeButton)
+        likeCommentShareContainerView.addConstraintsWithFormat("V:[v0]|", views: commentButton)
+        likeCommentShareContainerView.addConstraintsWithFormat("V:[v0]|", views: shareButton)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -104,5 +186,11 @@ extension UIView {
         }
         
         addConstraints(NSLayoutConstraint.constraintsWithVisualFormat(format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
+    }
+}
+
+extension UIColor {
+    static func rgb(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) -> UIColor {
+        return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: alpha)
     }
 }
