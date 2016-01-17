@@ -13,7 +13,9 @@ class FeedViewController: UICollectionViewController, UICollectionViewDelegateFl
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView?.backgroundColor = UIColor.whiteColor()
+        navigationItem.title = "News Feed"
+        
+        collectionView?.backgroundColor = UIColor(white: 0.95, alpha: 1)
         
         registerCells()
     }
@@ -27,7 +29,6 @@ class FeedViewController: UICollectionViewController, UICollectionViewDelegateFl
     
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let feedCell = collectionView.dequeueReusableCellWithReuseIdentifier(feedCellId, forIndexPath: indexPath) as! FeedCell
-        feedCell.nameLabel.text = items[indexPath.item]
         return feedCell
     }
     
@@ -50,17 +51,41 @@ class FeedCell: UICollectionViewCell {
     
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "Post Name"
+        label.numberOfLines = 2
+        let attributedText = NSMutableAttributedString(string: "Mark Zuckerberg\n", attributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(14)])
+        attributedText.appendAttributedString(NSAttributedString(string: "December 18 • San Francisco • ", attributes: [NSFontAttributeName: UIFont.systemFontOfSize(12), NSForegroundColorAttributeName: UIColor.lightGrayColor()]))
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 4
+        let range = NSMakeRange(0, attributedText.string.characters.count)
+        attributedText.addAttribute(NSParagraphStyleAttributeName, value: paragraphStyle, range: range)
+        
+        let attachment = NSTextAttachment()
+        attachment.image = UIImage(named: "globe_small")
+        attachment.bounds = CGRectMake(0, -2, 12, 12)
+        attributedText.appendAttributedString(NSAttributedString(attachment: attachment))
+        
+        label.attributedText = attributedText
         return label
     }()
     
+    let profileImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .ScaleAspectFit
+        imageView.image = UIImage(named: "zuckprofile")
+        return imageView
+    }()
+    
     func setupViews() {
-        backgroundColor = UIColor.redColor()
+        backgroundColor = UIColor.whiteColor()
         
         addSubview(nameLabel)
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[v0]|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": nameLabel]))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[v0]|", options: NSLayoutFormatOptions(), metrics: nil, views: ["v0": nameLabel]))
+        addSubview(profileImageView)
+        
+        addConstraintsWithFormat("V:|-8-[v0]", views:nameLabel)
+        
+        addConstraintsWithFormat("H:|-8-[v0(40)]-8-[v1]", views: profileImageView, nameLabel)
+        addConstraintsWithFormat("V:|-8-[v0(40)]", views: profileImageView)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -69,3 +94,15 @@ class FeedCell: UICollectionViewCell {
     
 }
 
+extension UIView {
+    func addConstraintsWithFormat(format: String, views: UIView...) {
+        var viewsDictionary = [String: AnyObject]()
+        for (index, view) in views.enumerate() {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            let key = "v\(index)"
+            viewsDictionary[key] = view
+        }
+        
+        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat(format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
+    }
+}
